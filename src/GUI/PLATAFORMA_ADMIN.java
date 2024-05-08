@@ -202,7 +202,7 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
         add(pos);
     }
 
-    public JPanel Modificar(String nombre, String can, String codigo) {
+    public JPanel Modificar(String nombre, String can, String codigo, Image m) {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.white);
         gbc7.gridx = 0;
@@ -225,16 +225,29 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
         panel.add(txt_cod, gbc7);
         JLabel cod = new JLabel(codigo);
         gbc7.gridy = 5;
-        panel.add(cod,gbc7);
+        panel.add(cod, gbc7);
+        
+        gbc7.gridy = 6;
+        JLabel ft = new JLabel();
+        ft.setPreferredSize(new Dimension(75, 75));
+        panel.add(ft, gbc7);
+        
+        ImageIcon originalIcon = new ImageIcon(m);
+
+        int lblwidth = ft.getWidth();
+        int lblheight = ft.getHeight();
+
+        Image scalImage = originalIcon.getImage().getScaledInstance(75, 75, Image.SCALE_SMOOTH);
+        ft.setIcon(new ImageIcon(scalImage));
 
         JButton boton = new JButton("MODIFICAR");
-        gbc7.gridy = 6;
-        panel.add(boton,gbc7);
+        gbc7.gridy = 7;
+        panel.add(boton, gbc7);
 
         return panel;
     }
 
-    public JPanel solicitar(String nombre, String can, String codigo) {
+    public JPanel solicitar(String nombre, String can, String codigo, Image m) {
         JPanel panel = new JPanel(new GridBagLayout());
         gbc7.gridx = 0;
         gbc7.gridy = 0;
@@ -260,11 +273,45 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
         gbc7.gridy = 5;
         panel.add(cod, gbc7);
 
-        JButton boton = new JButton("PEDIR");
         gbc7.gridy = 6;
+        JLabel ft = new JLabel();
+        ft.setPreferredSize(new Dimension(75, 75));
+        panel.add(ft, gbc7);
+        
+        ImageIcon originalIcon = new ImageIcon(m);
+
+        int lblwidth = ft.getWidth();
+        int lblheight = ft.getHeight();
+
+        Image scalImage = originalIcon.getImage().getScaledInstance(75, 75, Image.SCALE_SMOOTH);
+        ft.setIcon(new ImageIcon(scalImage));
+        
+
+        JButton boton = new JButton("PEDIR");
+        boton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                accion_pedir(codigo);
+            }            
+        });
+        gbc7.gridy = 7;
         panel.add(boton, gbc7);
 
         return panel;
+    }
+    
+    public void accion_pedir(String codigo){
+        try{
+            int c = Integer.parseInt(codigo);
+            int mas = Integer.parseInt(JOptionPane.showInputDialog(null,"¿Cuantos elementos quieres pedir?"));
+            
+            a_productos pd = new a_productos();
+            pd.sumar(c, mas);
+            actualizarSoli();
+            
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(null, "ERROR EN LA CANTIDAD");
+        }
     }
 
     public JPanel eliminar() {
@@ -282,6 +329,24 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
         panel.add(e_cod);
         gbc4.gridy = 1;
         JButton boton = new JButton("ELIMINAR");
+        boton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int c = Integer.parseInt(e_cod.getText());
+                    boolean val_codigo = String.valueOf(Math.abs(c)).length() == 9;
+                    if (val_codigo) {
+                        a_productos borrar = new a_productos();
+                        borrar.eliminar(c);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "EL CODIGO ES DE 9 DIGITOS");
+                    }
+
+                } catch (Exception s) {
+                    JOptionPane.showMessageDialog(null, "ERROR EN EL CODIGO DE BARRAS VUELVE A COLOCAR EL CODIGO");
+                }
+            }
+        });
         boton.setFont(letra);
         panel.add(boton, gbc4);
 
@@ -495,13 +560,13 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
                     if (llenado && val_codigo && objeto_producto.val_codigo(cod.getText())) {
                         objeto_producto.agregarProducto(nombre, descripcion, cantidad, codigo, etiq, selectFile);
                     } else {
-                        if(!objeto_producto.val_codigo(cod.getText())){
+                        if (!objeto_producto.val_codigo(cod.getText())) {
                             JOptionPane.showMessageDialog(null, "CODIGO DE BARRAS YA UTILIZADO");
-                        }else{
+                        } else {
                             JOptionPane.showMessageDialog(null, "ERROR EN LOS DATOS, PORFAVOR TOMA EN CUENTA QUE DEBES COMPLETAR LOS DATOS Y EL CODIGO DE BARRAS DEBE TENER SOLO 9 DIGITOS");
                             System.out.println(String.valueOf(Math.abs(codigo)).length());
                         }
-                        
+
                     }
 
                 } catch (Exception rs) {
@@ -524,10 +589,24 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
         ArrayList<Integer> cantidades = sol.getCantidades();
         ArrayList<Integer> codigos = sol.getCodigos();
         ArrayList<String> etiquetas = sol.getEtiquetas();
+        ArrayList<byte[]> imageBytes = sol.getImageBytes();
+        ArrayList<Image> foto = new ArrayList<>();
 
         int totalElementos = nombres.size();
         int elementosPorPagina = 15;
         int totalPaginas = (int) Math.ceil((double) totalElementos / elementosPorPagina);
+
+        for (int i = 0; i < imageBytes.size(); i++) {
+            foto.add(null);
+            if (imageBytes.get(i) != null) {
+                try {
+                    ImageIcon imageIcon = new ImageIcon(imageBytes.get(i));
+                    foto.add(i, imageIcon.getImage());
+                } catch (Exception d) {
+                    JOptionPane.showMessageDialog(null, "ERROR: " + d.toString());
+                }
+            }
+        }
 
         for (int pagina = 0; pagina < totalPaginas; pagina++) {
             final int pag = pagina;
@@ -541,7 +620,7 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
                         gbc.gridy = i;
                         gbc.gridx = j;
                         gbc.insets = new Insets(10, 10, 10, 10);
-                        panelPagina.add(solicitar(nombres.get(indice), cantidades.get(indice).toString(), codigos.get(indice).toString()), gbc);
+                        panelPagina.add(solicitar(nombres.get(indice), cantidades.get(indice).toString(), codigos.get(indice).toString(), foto.get(indice)), gbc);
                     }
                 }
             }
@@ -618,10 +697,26 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
         ArrayList<Integer> cantidades = sol.getCantidades();
         ArrayList<Integer> codigos = sol.getCodigos();
         ArrayList<String> etiquetas = sol.getEtiquetas();
+        ArrayList<byte[]> imageBytes = sol.getImageBytes();
+        ArrayList<Image> foto = new ArrayList<>();
+        
 
         int totalElementos = nombres.size();
         int elementosPorPagina = 15;
         int totalPaginas = (int) Math.ceil((double) totalElementos / elementosPorPagina);
+        
+         for (int i = 0; i < imageBytes.size(); i++) {
+            foto.add(null);
+            if (imageBytes.get(i) != null) {
+                try {
+                    ImageIcon imageIcon = new ImageIcon(imageBytes.get(i));
+                    foto.add(i, imageIcon.getImage());
+                } catch (Exception d) {
+                    JOptionPane.showMessageDialog(null, "ERROR: " + d.toString());
+                }
+            }
+        }
+
 
         for (int pagina = 0; pagina < totalPaginas; pagina++) {
             final int pag = pagina;
@@ -635,7 +730,7 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
                         gbc.gridy = i;
                         gbc.gridx = j;
                         gbc.insets = new Insets(10, 10, 10, 10);
-                        panelPagina.add(Modificar(nombres.get(indice), cantidades.get(indice).toString(), codigos.get(indice).toString()), gbc);
+                        panelPagina.add(Modificar(nombres.get(indice), cantidades.get(indice).toString(), codigos.get(indice).toString(),foto.get(indice)), gbc);
                     }
                 }
             }
@@ -700,6 +795,12 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
             modi.add(panelPagina, "Pagina " + (pagina));
         }
         ((CardLayout) modi.getLayout()).first(modi);
+    }
+    
+    public void actualizarSoli(){
+        cardLayout.show(contenido, "Solicitar");
+                soli.removeAll();
+                rellenarSoli();
     }
 
     @Override
