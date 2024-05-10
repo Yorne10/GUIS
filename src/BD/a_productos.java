@@ -4,6 +4,7 @@
  */
 package BD;
 
+import java.awt.Image;
 import java.io.File;
 import java.io.FileInputStream;
 import javax.swing.JTextField;
@@ -23,6 +24,33 @@ public class a_productos {
     ArrayList<Integer> codigos = new ArrayList<>();
     ArrayList<String> etiquetas = new ArrayList<>();
     ArrayList<byte[]> imageBytes = new ArrayList<>();
+    ArrayList<Integer> vendidos = new ArrayList<>();
+    ArrayList<Integer> disponible = new ArrayList<>();
+    ArrayList<Integer> precio = new ArrayList<>();
+
+    public ArrayList<Integer> getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(ArrayList<Integer> precio) {
+        this.precio = precio;
+    }
+
+    public ArrayList<Integer> getVendidos() {
+        return vendidos;
+    }
+
+    public void setVendidos(ArrayList<Integer> vendidos) {
+        this.vendidos = vendidos;
+    }
+
+    public ArrayList<Integer> getDisponible() {
+        return disponible;
+    }
+
+    public void setDisponible(ArrayList<Integer> disponible) {
+        this.disponible = disponible;
+    }
 
     public ArrayList<String> getNombres() {
         return nombres;
@@ -45,10 +73,10 @@ public class a_productos {
     }
 
     //AGREGAR
-    public void agregarProducto(String nombre, String descripcion, int cantidad, int cod, String etiqueta, File foto) {
+    public void agregarProducto(String nombre, String descripcion, int cantidad, int cod, String etiqueta, File foto, int precio) {
         cconexion objetoConexion = new cconexion();
 
-        String consulta = "insert into productos (Nombre,Descripcion,Cantidad,Codigobarras,Etiqueta,Foto,Disponible) values(?,?,?,?,?,?,?);";
+        String consulta = "insert into productos (Nombre,Descripcion,Cantidad,Codigobarras,Etiqueta,Foto,Disponible,Precio) values(?,?,?,?,?,?,?,?);";
 
         try {
             FileInputStream fis = new FileInputStream(foto);
@@ -61,6 +89,7 @@ public class a_productos {
             cs.setString(5, etiqueta);
             cs.setBinaryStream(6, fis, (int) foto.length());
             cs.setInt(7, 1);
+            cs.setInt(8, precio);
 
             cs.execute();
 
@@ -79,6 +108,7 @@ public class a_productos {
         codigos.clear();
         etiquetas.clear();
         imageBytes.clear();
+        precio.clear();
         cconexion objetoConexion = new cconexion();
         String consulta = "SELECT Codigobarras FROM productos WHERE Disponible = 1;";
         try {
@@ -114,6 +144,88 @@ public class a_productos {
         return true;
 
     }
+    
+    
+    public void modificar(String nombre, String descri, String eti, int can, File m, int cod,int pre){
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        precio.clear();
+        
+        cconexion objetoConexion = new cconexion();
+        String consulta = "UPDATE productos SET Nombre = ?, Descripcion = ?, Cantidad = ?, Etiqueta = ?, Foto = ?, Precio = ? WHERE Codigobarras = ?";
+
+        try {
+            FileInputStream fis = new FileInputStream(m);
+
+            // Preparar la consulta
+            PreparedStatement preparedStatement = objetoConexion.estableceConexion().prepareStatement(consulta);
+
+            // Establecer el valor del código de barras
+            preparedStatement.setString(1, nombre);
+            preparedStatement.setString(2, descri);
+            preparedStatement.setString(4, eti);
+            preparedStatement.setInt(3, can);
+            preparedStatement.setBinaryStream(5, fis, (int) m.length());
+            preparedStatement.setInt(6, pre);
+            preparedStatement.setInt(7, cod);
+            
+            
+
+            // Ejecutar la consulta
+            int filasAfectadas = preparedStatement.executeUpdate();
+            System.out.println("Filas afectadas: " + filasAfectadas);
+            JOptionPane.showMessageDialog(null, "HAZ MODIFICADO EL PRODUCTO");
+            // Cerrar la conexión
+            preparedStatement.close();
+            objetoConexion.estableceConexion().close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
+    public void modificar(String nombre, String descri, String eti, int can, int cod, int pre){
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        precio.clear();
+        
+        cconexion objetoConexion = new cconexion();
+        String consulta = "UPDATE productos SET Nombre = ?, Descripcion = ?, Cantidad = ?, Etiqueta = ?, Precio = ? WHERE Codigobarras = ?";
+
+        try {
+            // Crear una lista para cada columna
+
+            // Preparar la consulta
+            PreparedStatement preparedStatement = objetoConexion.estableceConexion().prepareStatement(consulta);
+
+            preparedStatement.setString(1, nombre);
+            preparedStatement.setString(2, descri);
+            preparedStatement.setInt(3, can);
+            preparedStatement.setString(4, eti);
+            preparedStatement.setInt(5, pre);
+            
+            preparedStatement.setInt(6, cod);
+            
+
+            // Ejecutar la consulta
+            int filasAfectadas = preparedStatement.executeUpdate();
+            System.out.println("Filas afectadas: " + filasAfectadas);
+            JOptionPane.showMessageDialog(null, "HAZ MODIFICADO EL PRODUCTO");
+            // Cerrar la conexión
+            preparedStatement.close();
+            objetoConexion.estableceConexion().close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
 
     //CONSULTA NORMAL
     public void consulta() {
@@ -123,8 +235,11 @@ public class a_productos {
         codigos.clear();
         etiquetas.clear();
         imageBytes.clear();
+        disponible.clear();
+        vendidos.clear();
+        precio.clear();
         cconexion objetoConexion = new cconexion();
-        String consulta = "SELECT Nombre, Descripcion, Cantidad, Codigobarras, Etiqueta, Foto FROM productos WHERE Disponible = 1;";
+        String consulta = "SELECT Nombre, Descripcion, Cantidad, Codigobarras, Etiqueta, Foto, Disponible, Vendidos, Precio FROM productos WHERE Disponible = 1;";
 
         try {
             // Crear una lista para cada columna
@@ -141,6 +256,9 @@ public class a_productos {
                 codigos.add(rs.getInt("Codigobarras"));
                 etiquetas.add(rs.getString("Etiqueta"));
                 imageBytes.add(rs.getBytes("Foto"));
+                disponible.add(rs.getInt("Disponible"));
+                vendidos.add(rs.getInt("Vendidos"));
+                precio.add(rs.getInt("Precio"));
 
             }
 
@@ -175,6 +293,7 @@ public class a_productos {
         codigos.clear();
         etiquetas.clear();
         imageBytes.clear();
+        precio.clear();
         cconexion objetoConexion = new cconexion();
         String consulta = "UPDATE productos SET Disponible = 0 WHERE Codigobarras = ?";
 
@@ -208,6 +327,7 @@ public class a_productos {
         codigos.clear();
         etiquetas.clear();
         imageBytes.clear();
+        precio.clear();
         cconexion objetoConexion = new cconexion();
         String consulta = "SELECT Cantidad FROM productos WHERE Codigobarras=?;";
 
@@ -252,4 +372,205 @@ public class a_productos {
             JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
         }
     }
+    
+    public void buscar_limpieza(){
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        disponible.clear();
+        vendidos.clear();
+        precio.clear();
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT Nombre, Descripcion, Cantidad, Codigobarras, Etiqueta, Foto, Disponible, Vendidos, Precio FROM productos WHERE Disponible = 1 AND Etiqueta = \"LIMPIEZA\";";
+
+        try {
+            // Crear una lista para cada columna
+
+            // Ejecutar la consulta
+            Statement stmt = objetoConexion.estableceConexion().createStatement();
+            ResultSet rs = stmt.executeQuery(consulta);
+
+            // Recorrer los resultados y añadirlos a las listas
+            while (rs.next()) {
+                nombres.add(rs.getString("Nombre"));
+                descripciones.add(rs.getString("Descripcion"));
+                cantidades.add(rs.getInt("Cantidad"));
+                codigos.add(rs.getInt("Codigobarras"));
+                etiquetas.add(rs.getString("Etiqueta"));
+                imageBytes.add(rs.getBytes("Foto"));
+                disponible.add(rs.getInt("Disponible"));
+                vendidos.add(rs.getInt("Vendidos"));
+                precio.add(rs.getInt("Precio"));
+
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            stmt.close();
+            objetoConexion.estableceConexion().close();
+
+            // Aquí puedes trabajar con tus listas
+            // Por ejemplo, imprimir los nombres de los productos
+            for (String nombre : nombres) {
+                System.out.println(nombre);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
+    
+    public void buscar_hogar(){
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        disponible.clear();
+        vendidos.clear();
+        precio.clear();
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT Nombre, Descripcion, Cantidad, Codigobarras, Etiqueta, Foto, Disponible, Vendidos, Precio FROM productos WHERE Disponible = 1 AND Etiqueta = \"HOGAR\";";
+
+        try {
+            // Crear una lista para cada columna
+
+            // Ejecutar la consulta
+            Statement stmt = objetoConexion.estableceConexion().createStatement();
+            ResultSet rs = stmt.executeQuery(consulta);
+
+            // Recorrer los resultados y añadirlos a las listas
+            while (rs.next()) {
+                nombres.add(rs.getString("Nombre"));
+                descripciones.add(rs.getString("Descripcion"));
+                cantidades.add(rs.getInt("Cantidad"));
+                codigos.add(rs.getInt("Codigobarras"));
+                etiquetas.add(rs.getString("Etiqueta"));
+                imageBytes.add(rs.getBytes("Foto"));
+                disponible.add(rs.getInt("Disponible"));
+                vendidos.add(rs.getInt("Vendidos"));
+                precio.add(rs.getInt("Precio"));
+
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            stmt.close();
+            objetoConexion.estableceConexion().close();
+
+            // Aquí puedes trabajar con tus listas
+            // Por ejemplo, imprimir los nombres de los productos
+            for (String nombre : nombres) {
+                System.out.println(nombre);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
+    
+    public void buscar_salud(){
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        disponible.clear();
+        vendidos.clear();
+        precio.clear();
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT Nombre, Descripcion, Cantidad, Codigobarras, Etiqueta, Foto, Disponible, Vendidos, Precio FROM productos WHERE Disponible = 1 AND Etiqueta = \"SALUD\";";
+
+        try {
+            // Crear una lista para cada columna
+
+            // Ejecutar la consulta
+            Statement stmt = objetoConexion.estableceConexion().createStatement();
+            ResultSet rs = stmt.executeQuery(consulta);
+
+            // Recorrer los resultados y añadirlos a las listas
+            while (rs.next()) {
+                nombres.add(rs.getString("Nombre"));
+                descripciones.add(rs.getString("Descripcion"));
+                cantidades.add(rs.getInt("Cantidad"));
+                codigos.add(rs.getInt("Codigobarras"));
+                etiquetas.add(rs.getString("Etiqueta"));
+                imageBytes.add(rs.getBytes("Foto"));
+                disponible.add(rs.getInt("Disponible"));
+                vendidos.add(rs.getInt("Vendidos"));
+                precio.add(rs.getInt("Precio"));
+
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            stmt.close();
+            objetoConexion.estableceConexion().close();
+
+            // Aquí puedes trabajar con tus listas
+            // Por ejemplo, imprimir los nombres de los productos
+            for (String nombre : nombres) {
+                System.out.println(nombre);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
+    public void buscar_mascotas(){
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        disponible.clear();
+        vendidos.clear();
+        precio.clear();
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT Nombre, Descripcion, Cantidad, Codigobarras, Etiqueta, Foto, Disponible, Vendidos, Precio FROM productos WHERE Disponible = 1 AND Etiqueta = \"MASCOTAS\";";
+
+        try {
+            // Crear una lista para cada columna
+
+            // Ejecutar la consulta
+            Statement stmt = objetoConexion.estableceConexion().createStatement();
+            ResultSet rs = stmt.executeQuery(consulta);
+
+            // Recorrer los resultados y añadirlos a las listas
+            while (rs.next()) {
+                nombres.add(rs.getString("Nombre"));
+                descripciones.add(rs.getString("Descripcion"));
+                cantidades.add(rs.getInt("Cantidad"));
+                codigos.add(rs.getInt("Codigobarras"));
+                etiquetas.add(rs.getString("Etiqueta"));
+                imageBytes.add(rs.getBytes("Foto"));
+                disponible.add(rs.getInt("Disponible"));
+                vendidos.add(rs.getInt("Vendidos"));
+                precio.add(rs.getInt("Precio"));
+
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            stmt.close();
+            objetoConexion.estableceConexion().close();
+
+            // Aquí puedes trabajar con tus listas
+            // Por ejemplo, imprimir los nombres de los productos
+            for (String nombre : nombres) {
+                System.out.println(nombre);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
+    
+    
 }
