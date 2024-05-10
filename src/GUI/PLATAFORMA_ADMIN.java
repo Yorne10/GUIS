@@ -262,7 +262,16 @@ public class PLATAFORMA_ADMIN extends JFrame implements ActionListener {
         JPanel panel = new JPanel(new GridBagLayout());
         gbc7.gridx = 0;
         gbc7.gridy = 0;
-        panel.setBackground(Color.white);
+        int cnt = Integer.parseInt(can);
+        if(cnt>50){
+            panel.setBackground(Color.white);
+        }else if(cnt<50){
+            panel.setBackground(new Color(247, 249, 122));
+            if(cnt<20){
+              panel.setBackground(new Color(227, 37, 109));  
+            }
+        }
+        
         JLabel nom = new JLabel("Nombre");
         
         panel.add(nom, gbc7);
