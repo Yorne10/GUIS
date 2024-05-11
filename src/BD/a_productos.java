@@ -277,6 +277,58 @@ public class a_productos {
             JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
         }
     }
+    
+    
+    public void consulta_busq(String nom) {
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        disponible.clear();
+        vendidos.clear();
+        precio.clear();
+        cconexion objetoConexion = new cconexion();
+         String consulta = "SELECT Nombre, Descripcion, Cantidad, Codigobarras, Etiqueta, Foto, Disponible, Vendidos, Precio FROM productos WHERE Disponible = 1 AND Nombre = ?;";
+
+        try {
+            // Crear una lista para cada columna
+
+            // Ejecutar la consulta
+            PreparedStatement stmt = objetoConexion.estableceConexion().prepareStatement(consulta);
+            stmt.setString(1, nom);
+            ResultSet rs = stmt.executeQuery();
+
+            // Recorrer los resultados y añadirlos a las listas
+            while (rs.next()) {
+                nombres.add(rs.getString("Nombre"));
+                descripciones.add(rs.getString("Descripcion"));
+                cantidades.add(rs.getInt("Cantidad"));
+                codigos.add(rs.getInt("Codigobarras"));
+                etiquetas.add(rs.getString("Etiqueta"));
+                imageBytes.add(rs.getBytes("Foto"));
+                disponible.add(rs.getInt("Disponible"));
+                vendidos.add(rs.getInt("Vendidos"));
+                precio.add(rs.getInt("Precio"));
+
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            stmt.close();
+            objetoConexion.estableceConexion().close();
+
+            // Aquí puedes trabajar con tus listas
+            // Por ejemplo, imprimir los nombres de los productos
+            for (String nombre : nombres) {
+                System.out.println(nombre);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
 
     public ArrayList<byte[]> getImageBytes() {
         return imageBytes;

@@ -17,6 +17,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -37,7 +38,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     String[] tit_button = {"TODOS", "LIMPIEZA", "HOGAR", "SALUD", "MASCOTAS", "CARRITO"};
     Color btn_dentro = new Color(155, 35, 161);
     Color btn_fuera = new Color(153, 1, 160);
-    JPanel catalogo, todos, limpieza, hogar, salud, mascotas, carrito;
+    JPanel catalogo, todos, limpieza, hogar, salud, mascotas, carrito,busq;
     CardLayout cardLayout = new CardLayout();
     CardLayout cardLayout2 = new CardLayout();
     CardLayout cardLayout3 = new CardLayout();
@@ -45,6 +46,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     CardLayout cardLayout5 = new CardLayout();
     CardLayout cardLayout6 = new CardLayout();
     CardLayout cardLayout7 = new CardLayout();
+    CardLayout cardLayout8 = new CardLayout();
     int total;
     PLATAFORMA_US obj = this;
 
@@ -154,6 +156,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
 
         buscar = new JButton("BUSCAR");
         buscar.setPreferredSize(new Dimension(100, 40));
+        buscar.addActionListener(this);
         bus.add(buscar, gbc);
 
         back.add(bus, gbc);
@@ -175,6 +178,9 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
 
         carrito = new JPanel();
         carrito.setLayout(cardLayout7);
+        
+        busq = new JPanel();
+        busq.setLayout(cardLayout8);
 
         catalogo.add(todos, "Todos");
         catalogo.add(limpieza, "Limpieza");
@@ -182,6 +188,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         catalogo.add(salud, "Salud");
         catalogo.add(mascotas, "Mascotas");
         catalogo.add(carrito, "Carrito");
+        catalogo.add(busq,"Busqueda");
 
         back.add(catalogo, gbc);
 
@@ -787,7 +794,10 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
                 if(cod_can.containsKey(Integer.valueOf(codigo))){
                     
                     for(int i =0; i<codigos_g.size();i++){
-                        if(obj.codigos_g.get(i) == Integer.valueOf(codigo)){
+//                        System.out.println("CICLO FOR DESPUES");
+//                        System.out.println();
+                        if(Objects.equals(codigos_g.get(i), Integer.valueOf(codigo))){
+//                            System.out.println(cantidades_g.get(i));
                             c += cantidades_g.get(i);
                             it = i;
                         }
@@ -797,7 +807,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
                     }else if(c<0){
                         JOptionPane.showMessageDialog(null, "LA CANTIDAD AÑADIDA Y EL ANTERIOR DA NUMERO NEGATIVO");
                     }else{
-                        obj.cod_can.put(Integer.valueOf(codigo), c);
+                        cod_can.put(Integer.valueOf(codigo), c);
                         cantidades_g.set(it, c);
                     }
                     
@@ -986,11 +996,133 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         }
         ((CardLayout) carrito.getLayout()).first(carrito);
     }
+    
+    public void rellenarBusq(String nom) {
+        a_productos sol = new a_productos();
+        sol.consulta_busq(nom);
+
+        ArrayList<String> nombres = sol.getNombres();
+        ArrayList<String> descripciones = sol.getDescripciones();
+        ArrayList<Integer> cantidades = sol.getCantidades();
+        ArrayList<Integer> codigos = sol.getCodigos();
+        ArrayList<String> etiquetas = sol.getEtiquetas();
+        ArrayList<byte[]> imageBytes = sol.getImageBytes();
+        ArrayList<Image> foto = new ArrayList<>();
+        ArrayList<Integer> disponible = sol.getDisponible();
+        ArrayList<Integer> vendidos = sol.getVendidos();
+        ArrayList<Integer> precio = sol.getPrecio();
+        int totalElementos = nombres.size();
+        int elementosPorPagina = 15;
+        int totalPaginas = (int) Math.ceil((double) totalElementos / elementosPorPagina);
+
+        for (int i = 0; i < imageBytes.size(); i++) {
+            foto.add(null);
+            if (imageBytes.get(i) != null) {
+                try {
+                    ImageIcon imageIcon = new ImageIcon(imageBytes.get(i));
+                    foto.add(i, imageIcon.getImage());
+                } catch (Exception d) {
+                    JOptionPane.showMessageDialog(null, "ERROR: " + d.toString());
+                }
+            }
+        }
+
+        for (int pagina = 0; pagina < totalPaginas; pagina++) {
+            final int pag = pagina;
+            JPanel panelPagina = new JPanel(new GridBagLayout());
+            panelPagina.setBackground(Color.white);
+            GridBagConstraints gbc = new GridBagConstraints();
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 5; j++) {
+                    int indice = pagina * elementosPorPagina + i * 5 + j;
+                    if (indice < totalElementos) {
+                        gbc.gridy = i;
+                        gbc.gridx = j;
+                        gbc.insets = new Insets(10, 10, 10, 10);
+                        panelPagina.add(RELLENAR(nombres.get(indice), cantidades.get(indice).toString(), codigos.get(indice).toString(), foto.get(indice), descripciones.get(indice), etiquetas.get(indice), disponible.get(indice), vendidos.get(indice), precio.get(indice)), gbc);
+                    }
+                }
+            }
+            String txtnxt = "Pagina " + (pagina + 1);
+            String txtbk = "Pagina " + (pagina - 1);
+//        System.out.println(txtnxt);
+//        System.out.println(txtbk);
+//        System.out.println(pag);
+            if (totalPaginas > 1) {
+                if (pagina == 0) {
+                    gbc.gridy = 4;
+                    gbc.gridx = 5;
+                    JButton next = new JButton("SIGUIENTE");
+                    next.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            cardLayout8.show(busq, txtnxt);
+//                System.out.println("SIGUIENTE");
+                        }
+                    });
+                    next.setFont(letra);
+                    panelPagina.add(next, gbc);
+                } else if (pagina == totalPaginas - 1) {
+                    gbc.gridy = 4;
+                    gbc.gridx = 0;
+                    JButton back = new JButton("ATRAS");
+                    back.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            cardLayout8.show(busq, txtbk);
+                        }
+                    });
+                    back.setFont(letra);
+                    panelPagina.add(back, gbc);
+                } else {
+                    gbc.gridy = 4;
+                    gbc.gridx = 5;
+                    JButton next = new JButton("SIGUIENTE");
+                    next.setFont(letra);
+                    next.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            cardLayout8.show(busq, txtnxt);
+                        }
+                    });
+
+                    panelPagina.add(next, gbc);
+                    gbc.gridy = 4;
+                    gbc.gridx = 0;
+                    JButton back = new JButton("ATRAS");
+                    back.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            cardLayout8.show(busq, txtbk);
+                        }
+                    });
+                    back.setFont(letra);
+                    panelPagina.add(back, gbc);
+                }
+            }
+
+            busq.add(panelPagina, "Pagina " + (pagina));
+        }
+        ((CardLayout) busq.getLayout()).first(busq);
+    }
+    
 
     @Override
     public void actionPerformed(ActionEvent e) {
         JButton botonPresionado = (JButton) e.getSource();
         String textoBoton = botonPresionado.getLabel();
+        
+        if(e.getSource()==buscar){
+                busq.removeAll();
+                if(busqueda.getText().equals("")){
+                    JOptionPane.showMessageDialog(null, "COLOQUE UN NOMBRE DE ALGUN PRODUCTO QUE BUSQUE");
+                }else{
+                   rellenarBusq(busqueda.getText());
+                   cardLayout.show(catalogo, "Busqueda"); 
+                }
+                
+        }
 
         switch (textoBoton) {
             case "TODOS":
