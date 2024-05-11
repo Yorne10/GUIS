@@ -38,7 +38,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     String[] tit_button = {"TODOS", "LIMPIEZA", "HOGAR", "SALUD", "MASCOTAS", "CARRITO"};
     Color btn_dentro = new Color(155, 35, 161);
     Color btn_fuera = new Color(153, 1, 160);
-    JPanel catalogo, todos, limpieza, hogar, salud, mascotas, carrito,busq;
+    JPanel catalogo, todos, limpieza, hogar, salud, mascotas, carrito,busq,carrito_comp;
     CardLayout cardLayout = new CardLayout();
     CardLayout cardLayout2 = new CardLayout();
     CardLayout cardLayout3 = new CardLayout();
@@ -47,7 +47,8 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     CardLayout cardLayout6 = new CardLayout();
     CardLayout cardLayout7 = new CardLayout();
     CardLayout cardLayout8 = new CardLayout();
-    int total;
+    
+    
     PLATAFORMA_US obj = this;
 
     ArrayList<Integer> carrito_barras = new ArrayList<>();
@@ -55,6 +56,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     HashMap<Integer, Integer> cod_can = new HashMap<>();
 
     GridBagConstraints gbc7 = new GridBagConstraints();
+    GridBagConstraints gbc5 = new GridBagConstraints();
     Font letra = new Font("Lucida Sans", Font.PLAIN, 27);
 
     ArrayList<String> nombres_g = new ArrayList<>();
@@ -67,6 +69,8 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     ArrayList<Integer> disponible_g = new ArrayList<>();
     ArrayList<Integer> vendidos_g= new ArrayList<>();
     ArrayList<Integer> precio_g = new ArrayList<>();
+    JLabel total;
+    JButton pag;
 
     public PLATAFORMA_US() {
         setTitle("MENU_USUARIO");
@@ -181,13 +185,28 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         
         busq = new JPanel();
         busq.setLayout(cardLayout8);
+        
+        carrito_comp = new JPanel(new GridBagLayout());
+        gbc5.gridx=0;
+        gbc5.gridy = 0;
+        carrito_comp.add(carrito,gbc5);
+        
+        gbc5.gridy=1;
+         total = new JLabel("TOTAL: $ " + sum());
+        total.setFont(letra_titulo);
+        carrito_comp.add(total,gbc5);
+        gbc5.gridx = 1;
+        pag = new JButton("PAGAR");
+        pag.setFont(letra_titulo);
+        carrito_comp.add(pag,gbc5);
+        
 
         catalogo.add(todos, "Todos");
         catalogo.add(limpieza, "Limpieza");
         catalogo.add(hogar, "Hogar");
         catalogo.add(salud, "Salud");
         catalogo.add(mascotas, "Mascotas");
-        catalogo.add(carrito, "Carrito");
+        catalogo.add(carrito_comp, "Carrito");
         catalogo.add(busq,"Busqueda");
 
         back.add(catalogo, gbc);
@@ -195,6 +214,17 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         pos.add(back, BorderLayout.NORTH);
         add(pos);
 
+    }
+    
+    public int sum(){
+         int s = 0;
+         System.out.println(precio_g.size());
+        for(int i = 0; i< precio_g.size() ;i++){
+            s += precio_g.get(i ) * cantidades_g.get(i);
+            System.out.println(s);
+        }
+        
+        return s;
     }
 
     public void rellenarLimpieza() {
@@ -1164,6 +1194,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
                 carrito.removeAll();
                 rellenarCarrito();
                 cardLayout.show(catalogo, "Carrito");
+                total.setText("TOTAL: $"+sum());
                 System.out.println("Presionaste el botón CARRITO");
                 break;
 
