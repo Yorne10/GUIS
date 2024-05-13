@@ -15,7 +15,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
- * @author lucho
+ * @author ANGEL BARON GARCIA
  */
 public class GUI_ver_mas extends JFrame implements ActionListener {
 

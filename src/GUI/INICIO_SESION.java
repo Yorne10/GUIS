@@ -6,7 +6,7 @@ package GUI;
 
 /**
  *
- * @author lucho
+ * @author ANGEL BARON GARCIA
  */
 public class INICIO_SESION {
     

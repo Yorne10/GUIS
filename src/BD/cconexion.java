@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author lucho
+ * @author ANGEL BARON GARCIA
  */
 public class cconexion {
     Connection conectar=null;

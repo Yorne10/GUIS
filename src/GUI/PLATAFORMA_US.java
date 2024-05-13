@@ -24,7 +24,7 @@ import javax.swing.*;
 
 /**
  *
- * @author lucho
+ * @author ANGEL BARON GARCIA
  */
 public class PLATAFORMA_US extends JFrame implements ActionListener {
 
@@ -38,7 +38,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     String[] tit_button = {"TODOS", "LIMPIEZA", "HOGAR", "SALUD", "MASCOTAS", "CARRITO"};
     Color btn_dentro = new Color(155, 35, 161);
     Color btn_fuera = new Color(153, 1, 160);
-    JPanel catalogo, todos, limpieza, hogar, salud, mascotas, carrito,busq,carrito_comp;
+    JPanel catalogo, todos, limpieza, hogar, salud, mascotas, carrito, busq, carrito_comp;
     CardLayout cardLayout = new CardLayout();
     CardLayout cardLayout2 = new CardLayout();
     CardLayout cardLayout3 = new CardLayout();
@@ -47,8 +47,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     CardLayout cardLayout6 = new CardLayout();
     CardLayout cardLayout7 = new CardLayout();
     CardLayout cardLayout8 = new CardLayout();
-    
-    
+
     PLATAFORMA_US obj = this;
 
     ArrayList<Integer> carrito_barras = new ArrayList<>();
@@ -67,7 +66,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
     ArrayList<Image> imageBytes_g = new ArrayList<>();
     ArrayList<Image> foto_g = new ArrayList<>();
     ArrayList<Integer> disponible_g = new ArrayList<>();
-    ArrayList<Integer> vendidos_g= new ArrayList<>();
+    ArrayList<Integer> vendidos_g = new ArrayList<>();
     ArrayList<Integer> precio_g = new ArrayList<>();
     JLabel total;
     JButton pag;
@@ -182,24 +181,100 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
 
         carrito = new JPanel();
         carrito.setLayout(cardLayout7);
-        
+
         busq = new JPanel();
         busq.setLayout(cardLayout8);
-        
+
         carrito_comp = new JPanel(new GridBagLayout());
-        gbc5.gridx=0;
+        gbc5.gridx = 0;
         gbc5.gridy = 0;
-        carrito_comp.add(carrito,gbc5);
-        
-        gbc5.gridy=1;
-         total = new JLabel("TOTAL: $ " + sum());
+        carrito_comp.add(carrito, gbc5);
+
+        gbc5.gridy = 1;
+        total = new JLabel("TOTAL: $ " + sum());
         total.setFont(letra_titulo);
-        carrito_comp.add(total,gbc5);
+        carrito_comp.add(total, gbc5);
         gbc5.gridx = 1;
         pag = new JButton("PAGAR");
         pag.setFont(letra_titulo);
-        carrito_comp.add(pag,gbc5);
-        
+        pag.addActionListener((ActionEvent e) -> {
+            if (!nombres_g.isEmpty()) {
+
+                String nombre_us = JOptionPane.showInputDialog("COLOQUE SU NOMBRE: ");
+                String correo = JOptionPane.showInputDialog("COLOQUE SU CORREO:");
+
+                String lista = "";
+
+                if (nombre_us.matches("[a-zA-Z]+") && correo.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{3,}")) {
+                    a_productos n_venta = new a_productos();
+                    int v_limp = 0;
+                    int v_ho = 0;
+                    int v_sa = 0;
+                    int v_masc = 0;
+                    for (int i = 0; i < nombres_g.size(); i++) {
+                        String nombre = nombres_g.get(i);
+                        int cantidad = cantidades_g.get(i);
+                        double precio = precio_g.get(i);
+                        switch (etiquetas_g.get(i)) {
+                            case "LIMPIEZA":
+                                v_limp += cantidades_g.get(i) * precio_g.get(i);
+                                break;
+                            case "HOGAR":
+                                v_ho += cantidades_g.get(i) * precio_g.get(i);
+                                break;
+                            case "SALUD":
+                                v_sa += cantidades_g.get(i) * precio_g.get(i);
+                                break;
+                            case "MASCOTAS":
+                                v_masc += cantidades_g.get(i) * precio_g.get(i);
+                                break;
+                        }
+                        n_venta.sumar_vend(codigos_g.get(i), cantidades_g.get(i));
+                        n_venta.quitar_p(cantidades_g.get(i), codigos_g.get(i));
+                        lista += String.format("%-20s x%-10d $%.2f%n", nombre, cantidad, precio);
+
+                    }
+                    try {
+
+                        n_venta.agregarPedido(nombre_us, correo, sum(), lista);
+                        n_venta.sumar_eti("LIMPIEZA", v_limp);
+                        n_venta.sumar_eti("HOGAR", v_ho);
+                        n_venta.sumar_eti("SALUD", v_sa);
+                        n_venta.sumar_eti("MASCOTAS", v_masc);
+                        n_venta.sumar_total(sum());
+                        
+                        nombres_g.clear();
+                        cantidades_g.clear();
+                        codigos_g.clear();
+                        foto_g.clear();
+                        etiquetas_g.clear();
+                        precio_g.clear();
+                        cod_can.clear();
+                        carrito.removeAll();
+                        rellenarCarrito();
+                        cardLayout.show(catalogo, "Carrito");
+                        total.setText("TOTAL: $" + sum());
+                        
+
+                    } catch (Exception r) {
+
+                    }
+                } else {
+                    if (!nombre_us.matches("[a-zA-Z]+")) {
+                        JOptionPane.showMessageDialog(this, "Por favor, ingresa un nombre válido (solo letras).", "Error", JOptionPane.ERROR_MESSAGE);
+
+                    }
+                    // Validar correo electrónico con expresión regular
+                    if (!correo.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{3,}")) {
+                        JOptionPane.showMessageDialog(this, "Por favor, ingresa un correo electrónico válido.", "Error", JOptionPane.ERROR_MESSAGE);
+
+                    }
+                }
+            }else{
+                JOptionPane.showMessageDialog(null, "AÑADA PRODUCTOS AL CARRITO");
+            }
+        });
+        carrito_comp.add(pag, gbc5);
 
         catalogo.add(todos, "Todos");
         catalogo.add(limpieza, "Limpieza");
@@ -207,7 +282,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         catalogo.add(salud, "Salud");
         catalogo.add(mascotas, "Mascotas");
         catalogo.add(carrito_comp, "Carrito");
-        catalogo.add(busq,"Busqueda");
+        catalogo.add(busq, "Busqueda");
 
         back.add(catalogo, gbc);
 
@@ -215,15 +290,15 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         add(pos);
 
     }
-    
-    public int sum(){
-         int s = 0;
-         System.out.println(precio_g.size());
-        for(int i = 0; i< precio_g.size() ;i++){
-            s += precio_g.get(i ) * cantidades_g.get(i);
+
+    public int sum() {
+        int s = 0;
+        System.out.println(precio_g.size());
+        for (int i = 0; i < precio_g.size(); i++) {
+            s += precio_g.get(i) * cantidades_g.get(i);
             System.out.println(s);
         }
-        
+
         return s;
     }
 
@@ -352,8 +427,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         ArrayList<Integer> disponible = sol.getDisponible();
         ArrayList<Integer> vendidos = sol.getVendidos();
         ArrayList<Integer> precio = sol.getPrecio();
-        
-        
+
         int totalElementos = nombres.size();
         int elementosPorPagina = 15;
         int totalPaginas = (int) Math.ceil((double) totalElementos / elementosPorPagina);
@@ -818,50 +892,50 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         boton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try{
-                int c = Integer.parseInt(JOptionPane.showInputDialog(null, "¿CUANTOS PRODUCTOS QUIERES?"));
-                int it=0;
-                if(cod_can.containsKey(Integer.valueOf(codigo))){
-                    
-                    for(int i =0; i<codigos_g.size();i++){
+                try {
+                    int c = Integer.parseInt(JOptionPane.showInputDialog(null, "¿CUANTOS PRODUCTOS QUIERES?"));
+                    int it = 0;
+                    if (cod_can.containsKey(Integer.valueOf(codigo))) {
+
+                        for (int i = 0; i < codigos_g.size(); i++) {
 //                        System.out.println("CICLO FOR DESPUES");
 //                        System.out.println();
-                        if(Objects.equals(codigos_g.get(i), Integer.valueOf(codigo))){
+                            if (Objects.equals(codigos_g.get(i), Integer.valueOf(codigo))) {
 //                            System.out.println(cantidades_g.get(i));
-                            c += cantidades_g.get(i);
-                            it = i;
+                                c += cantidades_g.get(i);
+                                it = i;
+                            }
+                        }
+                        if (c > Integer.parseInt(can)) {
+                            JOptionPane.showMessageDialog(null, "LA CANTIDAD AÑADIDA EXCEDE EL LIMITE");
+                        } else if (c < 0) {
+                            JOptionPane.showMessageDialog(null, "LA CANTIDAD AÑADIDA Y EL ANTERIOR DA NUMERO NEGATIVO");
+                        } else {
+                            cod_can.put(Integer.valueOf(codigo), c);
+                            cantidades_g.set(it, c);
+                        }
+
+                    } else {
+                        System.out.println("NO HAY LLAVE");
+                        System.out.println(codigo);
+
+                        if (c > Integer.parseInt(can)) {
+                            JOptionPane.showMessageDialog(null, "LA CANTIDAD EXCEDE DEL LIMITE");
+                        } else if (c < 0) {
+                            JOptionPane.showMessageDialog(null, "LA CANTIDAD TIENE QUE SER MÁS DE 1");
+                        } else {
+                            nombres_g.add(nombre);
+                            cantidades_g.add(c);
+                            codigos_g.add(Integer.valueOf(codigo));
+                            precio_g.add(pre);
+                            etiquetas_g.add(eti);
+                            imageBytes_g.add(m);
+                            cod_can.put(Integer.valueOf(codigo), c);
                         }
                     }
-                    if(c>Integer.parseInt(can)){
-                        JOptionPane.showMessageDialog(null, "LA CANTIDAD AÑADIDA EXCEDE EL LIMITE");
-                    }else if(c<0){
-                        JOptionPane.showMessageDialog(null, "LA CANTIDAD AÑADIDA Y EL ANTERIOR DA NUMERO NEGATIVO");
-                    }else{
-                        cod_can.put(Integer.valueOf(codigo), c);
-                        cantidades_g.set(it, c);
-                    }
-                    
-                }else{
-                    System.out.println("NO HAY LLAVE");
-                    System.out.println(codigo);
-                
-                if(c>Integer.parseInt(can)){
-                    JOptionPane.showMessageDialog(null, "LA CANTIDAD EXCEDE DEL LIMITE");
-                }else if(c<0){
-                    JOptionPane.showMessageDialog(null, "LA CANTIDAD TIENE QUE SER MÁS DE 1");
-                }else{
-                    nombres_g.add(nombre);
-                    cantidades_g.add(c);
-                    codigos_g.add(Integer.valueOf(codigo));
-                    precio_g.add(pre);
-                    etiquetas_g.add(eti);
-                    imageBytes_g.add(m);
-                    cod_can.put(Integer.valueOf(codigo), c);
+                } catch (Exception s) {
+                    JOptionPane.showMessageDialog(null, "ERROR EN LOS DATOS");
                 }
-                }
-            }catch(Exception s){
-                JOptionPane.showMessageDialog(null, "ERROR EN LOS DATOS");
-            }
             }
 
         });
@@ -872,7 +946,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         boton2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                GUI_ver_mas inicio = new GUI_ver_mas(nombre, descri, Integer.parseInt(codigo), Integer.parseInt(can), m, pre,obj,eti);
+                GUI_ver_mas inicio = new GUI_ver_mas(nombre, descri, Integer.parseInt(codigo), Integer.parseInt(can), m, pre, obj, eti);
             }
 
         });
@@ -881,8 +955,8 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
 
         return panel;
     }
-    
-    public JPanel RELLENAR_C(String nombre, String can, String codigo, Image m, String eti, int pre) {
+
+    public JPanel RELLENAR_C(String nombre, String can, String codigo, Image m, String eti, int pre, int indice) {
 
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.white);
@@ -902,13 +976,10 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         panel.add(cn, gbc7);
         gbc7.gridy = 4;
         JLabel txtCann = new JLabel("Cantidad");
-        panel.add(txtCann,gbc7);
+        panel.add(txtCann, gbc7);
         gbc7.gridy = 5;
         JLabel c = new JLabel(can);
-        panel.add(c,gbc7);
-        
-        
-        
+        panel.add(c, gbc7);
 
         gbc7.gridy = 6;
         JLabel ft = new JLabel();
@@ -923,14 +994,29 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         Image scalImage = originalIcon.getImage().getScaledInstance(75, 75, Image.SCALE_SMOOTH);
         ft.setIcon(new ImageIcon(scalImage));
 
-        
+        gbc7.gridy = 7;
+
+        JButton canc = new JButton("ELIMINAR");
+        canc.addActionListener((ActionEvent e) -> {
+            nombres_g.remove(indice);
+            cantidades_g.remove(indice);
+            codigos_g.remove(indice);
+            foto_g.remove(indice);
+            etiquetas_g.remove(indice);
+            precio_g.remove(indice);
+            cod_can.remove(Integer.valueOf(codigo));
+            carrito.removeAll();
+            rellenarCarrito();
+            cardLayout.show(catalogo, "Carrito");
+            total.setText("TOTAL: $" + sum());
+        });
+        panel.add(canc, gbc7);
+
         return panel;
     }
 
     public void rellenarCarrito() {
-        
 
-        
         int totalElementos = nombres_g.size();
         int elementosPorPagina = 15;
         int totalPaginas = (int) Math.ceil((double) totalElementos / elementosPorPagina);
@@ -960,7 +1046,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
                         gbc.gridy = i;
                         gbc.gridx = j;
                         gbc.insets = new Insets(10, 10, 10, 10);
-                        panelPagina.add(RELLENAR_C(nombres_g.get(indice), cantidades_g.get(indice).toString(), codigos_g.get(indice).toString(), foto_g.get(indice), etiquetas_g.get(indice), precio_g.get(indice)), gbc);
+                        panelPagina.add(RELLENAR_C(nombres_g.get(indice), cantidades_g.get(indice).toString(), codigos_g.get(indice).toString(), foto_g.get(indice), etiquetas_g.get(indice), precio_g.get(indice), indice), gbc);
                     }
                 }
             }
@@ -1026,7 +1112,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         }
         ((CardLayout) carrito.getLayout()).first(carrito);
     }
-    
+
     public void rellenarBusq(String nom) {
         a_productos sol = new a_productos();
         sol.consulta_busq(nom);
@@ -1136,22 +1222,21 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
         }
         ((CardLayout) busq.getLayout()).first(busq);
     }
-    
 
     @Override
     public void actionPerformed(ActionEvent e) {
         JButton botonPresionado = (JButton) e.getSource();
         String textoBoton = botonPresionado.getLabel();
-        
-        if(e.getSource()==buscar){
-                busq.removeAll();
-                if(busqueda.getText().equals("")){
-                    JOptionPane.showMessageDialog(null, "COLOQUE UN NOMBRE DE ALGUN PRODUCTO QUE BUSQUE");
-                }else{
-                   rellenarBusq(busqueda.getText());
-                   cardLayout.show(catalogo, "Busqueda"); 
-                }
-                
+
+        if (e.getSource() == buscar) {
+            busq.removeAll();
+            if (busqueda.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "COLOQUE UN NOMBRE DE ALGUN PRODUCTO QUE BUSQUE");
+            } else {
+                rellenarBusq(busqueda.getText());
+                cardLayout.show(catalogo, "Busqueda");
+            }
+
         }
 
         switch (textoBoton) {
@@ -1194,7 +1279,7 @@ public class PLATAFORMA_US extends JFrame implements ActionListener {
                 carrito.removeAll();
                 rellenarCarrito();
                 cardLayout.show(catalogo, "Carrito");
-                total.setText("TOTAL: $"+sum());
+                total.setText("TOTAL: $" + sum());
                 System.out.println("Presionaste el botón CARRITO");
                 break;
 

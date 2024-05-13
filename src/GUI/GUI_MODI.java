@@ -14,7 +14,7 @@ import javax.swing.*;
 
 /**
  *
- * @author lucho
+ * @author ANGEL BARON GARCIA
  */
 public class GUI_MODI extends JFrame implements ActionListener{
     String nombre,can,codigo,descri,eti;

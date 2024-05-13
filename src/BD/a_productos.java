@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author lucho
+ * @author ANGEL BARON GARCIA
  */
 public class a_productos {
 
@@ -27,6 +27,12 @@ public class a_productos {
     ArrayList<Integer> vendidos = new ArrayList<>();
     ArrayList<Integer> disponible = new ArrayList<>();
     ArrayList<Integer> precio = new ArrayList<>();
+    
+    ArrayList<String> usuario = new ArrayList<>();
+    ArrayList<String> correo = new ArrayList<>();
+    ArrayList<String> pedido = new ArrayList<>();
+    ArrayList<Integer> total = new ArrayList<>();
+    ArrayList<Integer> ID = new ArrayList<>();
 
     public ArrayList<Integer> getPrecio() {
         return precio;
@@ -100,6 +106,194 @@ public class a_productos {
         }
 
     }
+    
+    public void agregarPedido(String nombre,String correo,int total,String pedido) {
+        cconexion objetoConexion = new cconexion();
+
+        String consulta = "insert into pedido (Usuario,Correo,Pedido,Total,Servido) values(?,?,?,?,?);";
+
+        try {
+           
+            CallableStatement cs = objetoConexion.estableceConexion().prepareCall(consulta);
+
+            cs.setString(1, nombre);
+            cs.setString(2, correo);
+            cs.setString(3, pedido);
+            cs.setInt(4, total);
+            cs.setInt(5, 1);
+            cs.execute();
+
+            JOptionPane.showMessageDialog(null, "Registro ingresado");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " EN PEDIR");
+        }
+
+    }
+    
+    public void sumar_eti(String etiqueta,int mas) {
+        int aux = 0;
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        precio.clear();
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT " + etiqueta + " FROM ventas WHERE ID=1;";
+
+        try {
+            // Preparar la consulta
+            PreparedStatement preparedStatement = objetoConexion.estableceConexion().prepareStatement(consulta);
+
+            // Establecer el valor del código de barras
+            
+
+            // Ejecutar la consulta
+            ResultSet rs = preparedStatement.executeQuery();
+
+            // Si hay un resultado, almacenarlo en 'aux'
+            if (rs.next()) {
+                aux = rs.getInt(etiqueta);
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            preparedStatement.close();
+            
+            aux += mas;
+            
+            String consulta2 = "UPDATE ventas SET " +etiqueta+ " = ? WHERE ID = 1";
+            
+            PreparedStatement preparedStatement2 = objetoConexion.estableceConexion().prepareStatement(consulta2);
+            
+            preparedStatement2.setInt(1, aux);
+            
+            
+            
+            int filasAfectadas = preparedStatement2.executeUpdate();
+            System.out.println("Filas afectadas: " + filasAfectadas);
+            JOptionPane.showMessageDialog(null, "HAZ AÑADIDO " + mas +" PRODUCTOS \n AHORA TIENES= " + aux);
+            
+            
+            preparedStatement2.close();
+            objetoConexion.estableceConexion().close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA ETIQUETA");
+        }
+    }
+    
+    public void sumar_total(int mas) {
+        int aux = 0;
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        precio.clear();
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT TOTALES FROM ventas WHERE ID=1;";
+
+        try {
+            // Preparar la consulta
+            PreparedStatement preparedStatement = objetoConexion.estableceConexion().prepareStatement(consulta);
+
+            // Establecer el valor del código de barras
+            
+
+            // Ejecutar la consulta
+            ResultSet rs = preparedStatement.executeQuery();
+
+            // Si hay un resultado, almacenarlo en 'aux'
+            if (rs.next()) {
+                aux = rs.getInt("TOTALES");
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            preparedStatement.close();
+            
+            aux += mas;
+            
+            String consulta2 = "UPDATE ventas SET TOTALES = ? WHERE ID = 1";
+            
+            PreparedStatement preparedStatement2 = objetoConexion.estableceConexion().prepareStatement(consulta2);
+            
+            preparedStatement2.setInt(1, aux);
+            
+            
+            
+            int filasAfectadas = preparedStatement2.executeUpdate();
+            System.out.println("Filas afectadas: " + filasAfectadas);
+            JOptionPane.showMessageDialog(null, "HAZ AÑADIDO " + mas +" PRODUCTOS \n AHORA TIENES= " + aux);
+            
+            
+            preparedStatement2.close();
+            objetoConexion.estableceConexion().close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA ETIQUETA");
+        }
+    }
+    
+    public void sumar_vend(int codigobarras,int mas) {
+        int aux = 0;
+        nombres.clear();
+        descripciones.clear();
+        cantidades.clear();
+        codigos.clear();
+        etiquetas.clear();
+        imageBytes.clear();
+        precio.clear();
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT Vendidos FROM productos WHERE Codigobarras=?;";
+
+        try {
+            // Preparar la consulta
+            PreparedStatement preparedStatement = objetoConexion.estableceConexion().prepareStatement(consulta);
+
+            // Establecer el valor del código de barras
+            preparedStatement.setInt(1, codigobarras);
+
+            // Ejecutar la consulta
+            ResultSet rs = preparedStatement.executeQuery();
+
+            // Si hay un resultado, almacenarlo en 'aux'
+            if (rs.next()) {
+                aux = rs.getInt("Vendidos");
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            preparedStatement.close();
+            
+            aux += mas;
+            
+            String consulta2 = "UPDATE productos SET Vendidos = ? WHERE Codigobarras = ?";
+            
+            PreparedStatement preparedStatement2 = objetoConexion.estableceConexion().prepareStatement(consulta2);
+            
+            preparedStatement2.setInt(1, aux);
+            preparedStatement2.setInt(2, codigobarras);
+            
+            
+            int filasAfectadas = preparedStatement2.executeUpdate();
+            System.out.println("Filas afectadas: " + filasAfectadas);
+            JOptionPane.showMessageDialog(null, "HAZ AÑADIDO " + mas +" PRODUCTOS \n AHORA TIENES= " + aux);
+            
+            
+            preparedStatement2.close();
+            objetoConexion.estableceConexion().close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
+    
+    
 
     public boolean val_codigo(String codigo) {
         nombres.clear();
@@ -259,6 +453,170 @@ public class a_productos {
                 disponible.add(rs.getInt("Disponible"));
                 vendidos.add(rs.getInt("Vendidos"));
                 precio.add(rs.getInt("Precio"));
+
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            stmt.close();
+            objetoConexion.estableceConexion().close();
+
+            // Aquí puedes trabajar con tus listas
+            // Por ejemplo, imprimir los nombres de los productos
+            for (String nombre : nombres) {
+                System.out.println(nombre);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
+
+    public ArrayList<String> getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(ArrayList<String> usuario) {
+        this.usuario = usuario;
+    }
+
+    public ArrayList<String> getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(ArrayList<String> correo) {
+        this.correo = correo;
+    }
+
+    public ArrayList<String> getPedido() {
+        return pedido;
+    }
+
+    public void setPedido(ArrayList<String> pedido) {
+        this.pedido = pedido;
+    }
+
+    public ArrayList<Integer> getTotal() {
+        return total;
+    }
+
+    public void setTotal(ArrayList<Integer> total) {
+        this.total = total;
+    }
+
+    public ArrayList<Integer> getID() {
+        return ID;
+    }
+
+    public void setID(ArrayList<Integer> ID) {
+        this.ID = ID;
+    }
+    
+    public void quitar_p(int c,int codigo){
+        int aux = 0;
+
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT Cantidad FROM productos WHERE Codigobarras=?;";
+
+        try {
+            // Preparar la consulta
+            PreparedStatement preparedStatement = objetoConexion.estableceConexion().prepareStatement(consulta);
+
+            // Establecer el valor del código de barras
+            preparedStatement.setInt(1, codigo);
+
+            // Ejecutar la consulta
+            ResultSet rs = preparedStatement.executeQuery();
+            
+            // Si hay un resultado, almacenarlo en 'aux'
+            if (rs.next()) {
+                aux = rs.getInt("Cantidad");
+            }
+
+            // Cerrar la conexión
+            rs.close();
+            preparedStatement.close();
+            
+            aux -= c;
+            
+            String consulta2 = "UPDATE productos SET Cantidad = ? WHERE Codigobarras = ?";
+            
+            PreparedStatement preparedStatement2 = objetoConexion.estableceConexion().prepareStatement(consulta2);
+            
+            preparedStatement2.setInt(1, aux);
+            
+            preparedStatement2.setInt(2, codigo);
+            
+            
+            int filasAfectadas = preparedStatement2.executeUpdate();
+            System.out.println("Filas afectadas: " + filasAfectadas);
+//            JOptionPane.showMessageDialog(null, "HAZ AÑADIDO " + mas +" PRODUCTOS \n AHORA TIENES= " + aux);
+            
+            
+            preparedStatement2.close();
+            objetoConexion.estableceConexion().close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " QUITAR PRODUCTO DE PEDIDO");
+        }
+    }
+    
+    public void terminar_pedido(int ID_b){
+        usuario.clear();
+        correo.clear();
+        pedido.clear();
+        total.clear();
+        ID.clear();
+        cconexion objetoConexion = new cconexion();
+        String consulta = "UPDATE pedido SET Servido = 0 WHERE ID = ?";
+
+        try {
+            // Crear una lista para cada columna
+
+            // Preparar la consulta
+            PreparedStatement preparedStatement = objetoConexion.estableceConexion().prepareStatement(consulta);
+
+            // Establecer el valor del código de barras
+            preparedStatement.setInt(1, ID_b);
+
+            // Ejecutar la consulta
+            int filasAfectadas = preparedStatement.executeUpdate();
+            System.out.println("Filas afectadas: " + filasAfectadas);
+            JOptionPane.showMessageDialog(null, "HAZ CONFIRMADO EL PEDIDO");
+            // Cerrar la conexión
+            preparedStatement.close();
+            objetoConexion.estableceConexion().close();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "ERROR :" + e.toString() + " CONSULTA SOLICITAR");
+        }
+    }
+    
+    
+    public void consulta_pedidos() {
+        usuario.clear();
+        correo.clear();
+        pedido.clear();
+        total.clear();
+        ID.clear();
+        
+        cconexion objetoConexion = new cconexion();
+        String consulta = "SELECT ID, Usuario, Correo, Pedido, Total FROM pedido WHERE Servido = 1;";
+
+        try {
+            // Crear una lista para cada columna
+
+            // Ejecutar la consulta
+            Statement stmt = objetoConexion.estableceConexion().createStatement();
+            ResultSet rs = stmt.executeQuery(consulta);
+
+            // Recorrer los resultados y añadirlos a las listas
+            while (rs.next()) {
+                usuario.add(rs.getString("Usuario"));
+                correo.add(rs.getString("Correo"));
+                pedido.add(rs.getString("Pedido"));
+                total.add(rs.getInt("Total"));
+                ID.add(rs.getInt("ID"));
 
             }
 
